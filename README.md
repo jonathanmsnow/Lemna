@@ -1,5 +1,5 @@
-# Well Plate Area
-A simple utility utilizing computer vision (openCV) which identifies wells and calculates the area for any region that matches the given mask (HSV lower-upper).
+# Frond Area CV
+A simple app utilizing computer vision (openCV) which identifies wells and calculates the area for any region that matches the given mask (HSV lower-upper).
 
 ## Getting Started
 
