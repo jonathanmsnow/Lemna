@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load the image
-image = cv2.imread('example-cropped.png')
+image = cv2.imread('images/start_r1_plate25_26.jpg')
 
 # Convert to grayscale
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -15,11 +15,11 @@ circles = cv2.HoughCircles(
     blurred, 
     cv2.HOUGH_GRADIENT, 
     dp=1, 
-    minDist=30, 
-    param1=50, 
+    minDist=60, 
+    param1=45, 
     param2=20, 
-    minRadius=50, 
-    maxRadius=75)
+    minRadius=120, 
+    maxRadius=145)
 
 # Function to sort circles top to bottom, then left to right
 def sort_circles(circles):
@@ -72,9 +72,7 @@ if circles is not None:
         # Isolate the region of the current well
         well = cv2.bitwise_and(image, image, mask=mask)
 
-        label = f"Well {i}"
-        cv2.putText(image, label, (x - 20, y - r - 10), cv2.FONT_HERSHEY_SIMPLEX, 
-                    0.6, (255, 0, 0), 2)  # Blue text above the circle
+
 
         # Convert the well region to HSV to detect green
         hsv_well = cv2.cvtColor(well, cv2.COLOR_BGR2HSV)
@@ -87,6 +85,9 @@ if circles is not None:
 
         # Calculate the total area of duckweed within the well
         total_area = sum(cv2.contourArea(c) for c in contours)
+        label = f"Well {i}: {total_area} pixels"
+        cv2.putText(image, label, (x - 20, y - r - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+                    0.6, (255, 0, 0), 2)  # Blue text above the circle
         print(f"Area of duckweed in well {i + 1}: {total_area} pixels")
 
 # Display the result with circles
