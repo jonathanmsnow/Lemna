@@ -5,10 +5,10 @@ A simple app utilizing computer vision (openCV) which identifies wells and calcu
 
 ### Dependencies
 
-* Python 3
-* Click
-* numpy
-* openCV
+* [Python 3](https://www.python.org/downloads/)
+* [Click](https://click.palletsprojects.com/en/8.1.x/)
+* [numpy](https://numpy.org/)
+* [openCV](https://opencv.org/)
 
 Following the install process below will add all dependecies (except for Python since it is required for installation and use).
 
@@ -21,21 +21,13 @@ Clone or download a zip of the repository.
 Navigate to the root directory of the cloned repository. You should see a file called `setup.py`.
 
 
-Now you should create and activate a virtual environment for Python. You can name it whatever you would like but we will use `venv`.
+Now you should [create and activate a virtual environment for Python](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). 
 
-```
-python3 -m venv .venv
-
-. .venv/bin/activate
-```
-
-Now install the app using pip.
+Once you are in your virtualenv, install the app using pip.
 
 `pip install --editable .`
 
-### Executing program
-
-#### commands
+### Commands
 
 You can use the app by typing `analyzer` in the terminal. Typing `analyzer --help` will show available commands.
 ##### threshold
