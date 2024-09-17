@@ -5,7 +5,7 @@ class WellDetector:
     def __init__(self, blurred_image):
         self.blurred_image = blurred_image
 
-    def detect_wells(self, dp=1, minDist=270, param1=45, param2=20, minRadius=120, maxRadius=145):
+    def detect_wells(self, dp=1, minDist=250, param1=45, param2=30, minRadius=155, maxRadius=180):
         circles = cv2.HoughCircles(self.blurred_image, cv2.HOUGH_GRADIENT, dp, minDist,
                                    param1=param1, param2=param2, minRadius=minRadius, maxRadius=maxRadius)
         return np.round(circles[0, :]).astype("int") if circles is not None else []
