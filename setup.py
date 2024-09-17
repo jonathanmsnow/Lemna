@@ -9,7 +9,8 @@ setup(
     install_requires=[
         'Click',
         'opencv-python',
-        'numpy'
+        'numpy',
+        'toml'
     ],
     entry_points={
         'console_scripts': [

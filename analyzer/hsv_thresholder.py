@@ -68,3 +68,4 @@ class HsvThresolder:
                 break
 
         cv2.destroyAllWindows()
+        return (hMin, sMin, vMin), (hMax, sMax, vMax)
