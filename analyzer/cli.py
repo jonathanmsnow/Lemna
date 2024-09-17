@@ -5,9 +5,9 @@ from analyzer.visualizer import Visualizer
 from analyzer.hsv_thresholder import HsvThresolder
 from analyzer.config_manager import ConfigManager
 from pathlib import Path
-
-
+import os
 import click
+
 
 @click.group()
 def cli():
@@ -56,7 +56,7 @@ def threshold(image, width, config):
     "--image",
     "images",
     type=click.Path(path_type=Path),
-    multiple=True,
+    multiple=False,
     help="The image file to open.",
 )
 @click.option('--dp', default=1, help='Inverse ratio of the accumulator resolution to the image resolution.')
@@ -72,7 +72,15 @@ def threshold(image, width, config):
     type=click.Path(path_type=Path),
     help="The config to use. Cannot be combined with individual params for configuration.",
 )
-def process(images, config, dp, min_dist, param1, param2, min_radius, max_radius):
+@click.option(
+    "-o",
+    "--output",
+    "output",
+    type=click.Path(path_type=Path, dir_okay=True),
+    multiple=False,
+    help="The name of the directory to output to.",
+)
+def process(images, config, output, dp, min_dist, param1, param2, min_radius, max_radius):
     """Processes images"""
 
     if config:
@@ -96,7 +104,7 @@ def process(images, config, dp, min_dist, param1, param2, min_radius, max_radius
         min_adius = min_adius or 120
         max_radius = max_radius or 145
 
-    def process_image(image_path):
+    def process_image(image_path, output):
         click.echo(f'Processing {image_path}')
         # Step 1: Load and preprocess the image
         processor = ImageProcessor(image_path)
@@ -111,6 +119,8 @@ def process(images, config, dp, min_dist, param1, param2, min_radius, max_radius
         analyzer = WellAnalyzer(processor.get_original_image())
         visualizer = Visualizer(processor.get_original_image(), sorted_circles)
 
+        csv_out = []
+        csv_out.append("Well,area")
         for i, (x, y, r) in enumerate(sorted_circles):
             # Analyze the duckweed in the current well
             contours, total_area = analyzer.analyze_plant_area(x, y, r)
@@ -118,15 +128,30 @@ def process(images, config, dp, min_dist, param1, param2, min_radius, max_radius
             # Draw the circle and contours on the image
             visualizer.draw_contours(contours)
             visualizer.add_text(x, y, r, f"Well {i}: {total_area} px")
-            # Step 4: Display the final annotated image
-        visualizer.draw_circles()
-        visualizer.show_image('Identified Wells', 1440)
 
-    if images[0].is_dir():
-        for image_path in images[0].iterdir():
-            process_image(image_path)
+            # add well number and area to output
+            csv_out.append(f"{i},{total_area}")
+
+        # Step 4: Display the final annotated image
+        visualizer.draw_circles()
+        #visualizer.show_image('Identified Wells', 1440)
+
+        os.makedirs(output, exist_ok=True)
+        out_name = os.path.splitext(os.path.basename(image_path))[0]
+        out_file = str(output) + "/" + out_name + ".csv"
+        with open(out_file, 'w') as f:
+            for line in csv_out:
+                f.write(line + '\n')
+
+        out_image = str(output) + "/" + out_name + "_annotated.png"
+        visualizer.save_image(out_image)
+
+
+    if images.is_dir():
+        for image_path in images.iterdir():
+            process_image(image_path, output)
     else:
-        process_image(images[0])
+        process_image(images, output)
 
 
 @cli.command()

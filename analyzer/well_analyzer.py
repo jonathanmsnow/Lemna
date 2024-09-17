@@ -1,5 +1,7 @@
 import numpy as np
 import cv2
+
+
 class WellAnalyzer:
     def __init__(self, image):
         self.image = image
@@ -23,6 +25,7 @@ class WellAnalyzer:
 
         # Find contours of the green areas
         contours, _ = cv2.findContours(mask_yellow_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        total_area = sum(cv2.contourArea(c) for c in contours)
+        filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) >= 200]
+        total_area = sum(cv2.contourArea(c) for c in filtered_contours)
 
-        return contours, total_area
+        return filtered_contours, total_area
