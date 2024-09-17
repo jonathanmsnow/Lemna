@@ -3,8 +3,10 @@ import cv2
 
 
 class WellAnalyzer:
-    def __init__(self, image):
+    def __init__(self, image, hsv_lower_bound, hsv_upper_bound):
         self.image = image
+        self.hsv_lower_bound = hsv_lower_bound
+        self.hsv_upper_bound = hsv_upper_bound
 
     def create_well_mask(self, x, y, r):
         mask = np.zeros(self.image.shape[:2], dtype=np.uint8)
@@ -18,13 +20,13 @@ class WellAnalyzer:
 
         # Define color ranges for green and brown
         # (hMin = 20 , sMin = 18, vMin = 0), (hMax = 179 , sMax = 255, vMax = 91)
-        mask_yellow_green = cv2.inRange(hsv_well, (20, 18, 0), (179, 255, 91))
+        mask = cv2.inRange(hsv_well, self.hsv_lower_bound, self.hsv_upper_bound)
         # (hMin = 44 , sMin = 17, vMin = 0), (hMax = 179 , sMax = 255, vMax = 81)
         # mask_brown = cv2.inRange(hsv_well, (44, 17, 0), (179, 255, 81))
         # combined_mask = cv2.bitwise_or(mask_yellow_green, mask_brown)
 
         # Find contours of the green areas
-        contours, _ = cv2.findContours(mask_yellow_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) >= 200]
         total_area = sum(cv2.contourArea(c) for c in filtered_contours)
 

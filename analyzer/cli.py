@@ -49,6 +49,7 @@ def threshold(image, width, config):
     config_manager = ConfigManager(config)
     config_manager.update(new_min_max_threshold)
     config_manager.write()
+    click.echo(f"Updated thresholds in {config}")
 
 @cli.command()
 @click.option(
@@ -82,17 +83,26 @@ def threshold(image, width, config):
 )
 def process(images, config, output, dp, min_dist, param1, param2, min_radius, max_radius):
     """Processes images"""
+    
+    hsv_lower_bound = (20, 18, 0)
+    hsv_upper_bound =  (179, 255, 91)
 
     if config:
         try:
             config_manager = ConfigManager(config)
-            config_data = config_manager.load()
-            dp = dp or config_data.get('dp', 1)
-            min_dist = min_dist or config_data.get('min_dist', 270)
-            param1 = param1 or config_data.get('param1', 45)
-            param2 = param2 or config_data.get('param2', 20)
-            min_radius = min_radius or config_data.get('min_radius', 120)
-            max_radius = max_radius or config_data.get('max_radius', 145)
+            config_manager.load()
+            
+            well_detector_config = config_manager.get('well_detector')
+            dp = well_detector_config.get('dp')
+            min_dist = well_detector_config.get('min_dist')
+            param1 = well_detector_config.get('param1')
+            param2 = well_detector_config.get('param2')
+            min_radius = well_detector_config.get('min_radius')
+            max_radius = well_detector_config.get('max_radius')
+
+            well_analyzer_config = config_manager.get('well_analyzer')
+            hsv_lower_bound = tuple(well_analyzer_config.get('hsv_lower_bound'))
+            hsv_upper_bound = tuple(well_analyzer_config.get('hsv_upper_bound'))
         except:
             click.echo(f"Failed while process config file {config}")
     else:
@@ -101,7 +111,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         min_dist = min_dist or 270
         param1 = param1 or 45
         param2 = param2 or 20
-        min_adius = min_adius or 120
+        min_adius = min_radius or 120
         max_radius = max_radius or 145
 
     def process_image(image_path, output):
@@ -116,7 +126,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         sorted_circles = detector.sort_circles(detected_circles)
 
         # Step 3: Analyze duckweed for each well
-        analyzer = WellAnalyzer(processor.get_original_image())
+        analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
         visualizer = Visualizer(processor.get_original_image(), sorted_circles)
 
         csv_out = []
@@ -134,7 +144,6 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
 
         # Step 4: Display the final annotated image
         visualizer.draw_circles()
-        #visualizer.show_image('Identified Wells', 1440)
 
         os.makedirs(output, exist_ok=True)
         out_name = os.path.splitext(os.path.basename(image_path))[0]

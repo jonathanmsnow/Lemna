@@ -4,7 +4,10 @@ from pathlib import Path
 class ConfigManager:
     def __init__(self, config_path=Path('./config.toml')):
         self.config_path = config_path
-        self.config = {}
+        if self.config_path.exists():
+            self.load()
+        else:
+            self.config = {}
 
     def validate(self):
         pass
@@ -15,6 +18,12 @@ class ConfigManager:
 
     def update(self, data):
         self.config.update(data)
+    
+    def get(self, key):
+        value = self.config.get(key)
+        if not value:
+            raise Exception(f'{key} not found in config {self.config_path}.')
+        return value
 
     def write(self):
         with open(self.config_path, 'w') as f:
