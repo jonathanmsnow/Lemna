@@ -20,3 +20,6 @@ class Visualizer:
         cv2.imshow(window_name, resized_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+    def save_image(self, file_name):
+        cv2.imwrite(file_name, self.annotated_image)
