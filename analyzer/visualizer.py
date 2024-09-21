@@ -1,11 +1,11 @@
 import cv2
+import numpy as np
 class Visualizer:
-    def __init__(self, original_image, circles):
+    def __init__(self, original_image):
         self.annotated_image = original_image.copy()
-        self.circles = circles
 
-    def draw_circles(self):
-        for x, y, r in self.circles:
+    def draw_wells(self, circles):
+        for x, y, r in circles:
             cv2.circle(self.annotated_image, (x, y), r, (255, 0, 255), 2)
 
     def draw_contours(self, contours, color=(0, 0, 255), thickness=2):
@@ -23,3 +23,12 @@ class Visualizer:
 
     def save_image(self, file_name):
         cv2.imwrite(file_name, self.annotated_image)
+    
+    def draw_plate_bounding_box(self, circles):
+        plate_np = np.array([(circle[0], circle[1]) for circle in circles], dtype=np.int32)
+
+        # Calculate the bounding rectangle
+        x, y, w, h = cv2.boundingRect(plate_np)
+
+        # Draw the bounding rectangle on the image
+        cv2.rectangle(self.annotated_image, (x, y), (x + w, y + h), (0, 255, 0), 2)

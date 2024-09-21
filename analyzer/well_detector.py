@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from sklearn.cluster import DBSCAN
 
 class WellDetector:
     def __init__(self, blurred_image):
@@ -31,3 +32,43 @@ class WellDetector:
             rows.append(sorted(current_row, key=lambda c: c[0]))
 
         return [circle for row in rows for circle in row]
+
+    def group_wells_into_plates(self, circles, expected_well_count=24, eps=350):
+        well_centers = [(x, y) for x, y, r in circles]
+        well_centers_np = np.array(well_centers)
+
+        # Use DBSCAN to cluster the wells based on proximity
+        dbscan = DBSCAN(eps=eps, min_samples=2)
+        labels = dbscan.fit_predict(well_centers_np)
+
+        # Group wells by cluster
+        clusters = {}
+        for label, circle in zip(labels, circles):
+            if label == -1:  # Noise, wells not part of any cluster
+                continue
+            if label not in clusters:
+                clusters[label] = []
+            clusters[label].append(circle)  # Store the original circle (x, y, r)
+
+        # Filter clusters by expected well count
+        plates = []
+        for cluster in clusters.values():
+            if len(cluster) == expected_well_count:
+                plates.append(cluster)  # Add the original wells in the cluster
+
+        return plates
+
+    def draw_plates(self, image, plates):
+        for plate in plates:
+            plate_np = np.array([(circle[0], circle[1]) for circle in plate], dtype=np.int32)
+
+            # Calculate the bounding rectangle
+            x, y, w, h = cv2.boundingRect(plate_np)
+
+            # Draw the bounding rectangle on the image
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+            # Show the annotated image
+            cv2.imshow('Detected Plates', image)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
