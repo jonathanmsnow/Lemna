@@ -4,7 +4,7 @@ class Visualizer:
     def __init__(self, original_image):
         self.annotated_image = original_image.copy()
 
-    def draw_wells(self, circles):
+    def draw_circles(self, circles):
         for x, y, r in circles:
             cv2.circle(self.annotated_image, (x, y), r, (255, 0, 255), 2)
 

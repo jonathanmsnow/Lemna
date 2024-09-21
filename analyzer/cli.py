@@ -126,40 +126,38 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         # print(wells)
         # sorted_circles = detector.sort_circles(detected_circles)
         sorted_wells = detector.sort_circles(wells)
-        # print(sorted_wells)
         plates = detector.group_wells_into_plates(sorted_wells)
-        # for plate in plates:
-        # detector.draw_plates(processor.get_original_image(), plates)
 
         # # Step 3: Analyze duckweed for each well
-        # analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
+        analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
         visualizer = Visualizer(processor.get_original_image())
+
+        csv_out = []
         for plate in plates:
-            visualizer.draw_wells(plate)
+            csv_out.append("Well,area")
+            for i, (x, y, r) in enumerate(plate):
+                # Analyze the duckweed in the current well
+                contours, total_area = analyzer.analyze_plant_area(x, y, r)
+
+                # Draw the circle and contours on the image
+                visualizer.draw_contours(contours)
+                row = i // 4  # Determine the row (0 for A, 1 for B, etc.)
+                col = i % 4   # Determine the column (0 for 1, 1 for 2, etc.)
+                label = f"{chr(65 + col)}{row + 1}"
+                visualizer.add_text(x, y, r, f"{label}: {total_area} px")
+
+                # add well number and area to output
+                csv_out.append(f"{label},{total_area}")
+
+            visualizer.draw_circles(plate)
             visualizer.draw_plate_bounding_box(plate)
             
-
-        # csv_out = []
-        # csv_out.append("Well,area")
-        # for i, (x, y, r) in enumerate(sorted_circles):
-        #     # Analyze the duckweed in the current well
-        #     contours, total_area = analyzer.analyze_plant_area(x, y, r)
-
-        #     # Draw the circle and contours on the image
-        #     visualizer.draw_contours(contours)
-        #     visualizer.add_text(x, y, r, f"Well {i}: {total_area} px")
-
-        #     # add well number and area to output
-        #     csv_out.append(f"{i},{total_area}")
-
-        # visualizer.draw_circles()
-
         os.makedirs(output, exist_ok=True)
         out_name = os.path.splitext(os.path.basename(image_path))[0]
-        # out_file = str(output) + "/" + out_name + ".csv"
-        # with open(out_file, 'w') as f:
-        #     for line in csv_out:
-        #         f.write(line + '\n')
+        out_file = str(output) + "/" + out_name + ".csv"
+        with open(out_file, 'w') as f:
+            for line in csv_out:
+                f.write(line + '\n')
 
         out_image = str(output) + "/" + out_name + "_annotated.png"
         visualizer.save_image(out_image)
