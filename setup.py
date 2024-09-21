@@ -10,7 +10,8 @@ setup(
         'Click',
         'opencv-python',
         'numpy',
-        'toml'
+        'toml',
+        'sklearn'
     ],
     entry_points={
         'console_scripts': [
