@@ -131,19 +131,18 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         # Step 2: Detect and sort circles (wells)
         detector = WellDetector(blurred_image)
         wells = detector.detect_wells(dp, min_dist, param1, param2, min_radius, max_radius)
-        # print(wells)
-        # sorted_circles = detector.sort_circles(detected_circles)
+       
         sorted_wells = detector.sort_circles(wells)
         plates = detector.group_wells_into_plates(sorted_wells, plate_rows=rows, plate_cols=cols)
 
-        # # Step 3: Analyze duckweed for each well
+        # Step 3: Analyze duckweed for each well
         analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
         visualizer = Visualizer(processor.get_original_image())
 
         csv_out = []
+        csv_out.append("Plate,Well,Area")
+
         for plate in plates:
-            print(plate)
-            csv_out.append("Well,area")
             for i, (x, y, r) in enumerate(plate.wells):
                 # Analyze the duckweed in the current well
                 contours, total_area = analyzer.analyze_plant_area(x, y, r)
@@ -154,8 +153,8 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
                 label = plate.get_well_label(i)
                 visualizer.add_text(x, y, r, f"{label}: {total_area} px")
 
-                # add well number and area to output
-                csv_out.append(f"{label},{total_area}")
+                # add well label and area to output
+                csv_out.append(f"{plate.label},{label},{total_area}")
 
             visualizer.draw_circles(plate.wells)
             visualizer.draw_plate_bounding_box(plate.wells)

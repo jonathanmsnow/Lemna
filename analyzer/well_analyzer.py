@@ -18,12 +18,7 @@ class WellAnalyzer:
         well_region = cv2.bitwise_and(self.image, self.image, mask=mask)
         hsv_well = cv2.cvtColor(well_region, cv2.COLOR_BGR2HSV)
 
-        # Define color ranges for green and brown
-        # (hMin = 20 , sMin = 18, vMin = 0), (hMax = 179 , sMax = 255, vMax = 91)
         mask = cv2.inRange(hsv_well, self.hsv_lower_bound, self.hsv_upper_bound)
-        # (hMin = 44 , sMin = 17, vMin = 0), (hMax = 179 , sMax = 255, vMax = 81)
-        # mask_brown = cv2.inRange(hsv_well, (44, 17, 0), (179, 255, 81))
-        # combined_mask = cv2.bitwise_or(mask_yellow_green, mask_brown)
 
         # Find contours of the green areas
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
