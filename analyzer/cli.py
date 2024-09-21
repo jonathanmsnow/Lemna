@@ -157,7 +157,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
                 csv_out.append(f"{plate.label},{label},{total_area}")
 
             visualizer.draw_circles(plate.wells)
-            visualizer.draw_plate_bounding_box(plate.wells)
+            visualizer.draw_plate_bounding_box(plate.wells, label=plate.label)
             
         os.makedirs(output, exist_ok=True)
         out_name = os.path.splitext(os.path.basename(image_path))[0]

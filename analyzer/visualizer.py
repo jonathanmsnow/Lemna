@@ -24,7 +24,7 @@ class Visualizer:
     def save_image(self, file_name):
         cv2.imwrite(file_name, self.annotated_image)
     
-    def draw_plate_bounding_box(self, circles):
+    def draw_plate_bounding_box(self, circles, label="Plate"):
         plate_np = np.array([(circle[0], circle[1]) for circle in circles], dtype=np.int32)
 
         # Calculate the bounding rectangle
@@ -32,3 +32,16 @@ class Visualizer:
 
         # Draw the bounding rectangle on the image
         cv2.rectangle(self.annotated_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+         # Set font and calculate the position for the label
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 1
+        font_thickness = 3
+        text_size = cv2.getTextSize(label, font, font_scale, font_thickness)[0]
+
+        # Calculate position: top-left corner of the bounding box
+        text_x = x
+        text_y = y - 10 if y - 10 > 10 else y + text_size[1] + 10
+
+        # Draw the label on the image
+        cv2.putText(self.annotated_image, label, (text_x, text_y), font, font_scale, (255, 255, 0), font_thickness)
