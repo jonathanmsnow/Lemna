@@ -11,7 +11,7 @@ setup(
         'opencv-python',
         'numpy',
         'toml',
-        'sklearn'
+        'scikit-learn'
     ],
     entry_points={
         'console_scripts': [
