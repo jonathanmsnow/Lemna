@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from analyzer.plate import Plate
 from sklearn.cluster import DBSCAN
 
 class WellDetector:
@@ -33,9 +34,10 @@ class WellDetector:
 
         return [circle for row in rows for circle in row]
 
-    def group_wells_into_plates(self, circles, expected_well_count=24, eps=350):
+    def group_wells_into_plates(self, circles, plate_rows=6, plate_cols=4, eps=350):
         well_centers = [(x, y) for x, y, r in circles]
         well_centers_np = np.array(well_centers)
+        expected_well_count = plate_rows * plate_cols
 
         # Use DBSCAN to cluster the wells based on proximity
         dbscan = DBSCAN(eps=eps, min_samples=2)
@@ -52,9 +54,16 @@ class WellDetector:
 
         # Filter clusters by expected well count
         plates = []
+        plate_count = 0;
         for cluster in clusters.values():
             if len(cluster) == expected_well_count:
-                plates.append(cluster)  # Add the original wells in the cluster
+                plate_count += 1
+                plate = Plate(
+                    label=f"Plate {plate_count}",
+                    rows=plate_rows, 
+                    cols=plate_cols, 
+                    wells=cluster)
+                plates.append(plate)  # Add the plate to our plates
 
         return plates
 

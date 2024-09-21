@@ -86,6 +86,9 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
     
     hsv_lower_bound = (20, 18, 0)
     hsv_upper_bound =  (179, 255, 91)
+    rows = 6
+    cols = 4
+    well_count = 24
 
     if config:
         try:
@@ -103,6 +106,11 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
             well_analyzer_config = config_manager.get('well_analyzer')
             hsv_lower_bound = tuple(well_analyzer_config.get('hsv_lower_bound'))
             hsv_upper_bound = tuple(well_analyzer_config.get('hsv_upper_bound'))
+
+            plate_config = config_manager.get('plate')
+            rows = plate_config.get('rows')
+            cols = plate_config.get('cols')
+            well_count = plate_config.get('well_count')
         except:
             click.echo(f"Failed while process config file {config}")
     else:
@@ -126,7 +134,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         # print(wells)
         # sorted_circles = detector.sort_circles(detected_circles)
         sorted_wells = detector.sort_circles(wells)
-        plates = detector.group_wells_into_plates(sorted_wells)
+        plates = detector.group_wells_into_plates(sorted_wells, plate_rows=rows, plate_cols=cols)
 
         # # Step 3: Analyze duckweed for each well
         analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
@@ -134,23 +142,23 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
 
         csv_out = []
         for plate in plates:
+            print(plate)
             csv_out.append("Well,area")
-            for i, (x, y, r) in enumerate(plate):
+            for i, (x, y, r) in enumerate(plate.wells):
                 # Analyze the duckweed in the current well
                 contours, total_area = analyzer.analyze_plant_area(x, y, r)
 
                 # Draw the circle and contours on the image
                 visualizer.draw_contours(contours)
-                row = i // 4  # Determine the row (0 for A, 1 for B, etc.)
-                col = i % 4   # Determine the column (0 for 1, 1 for 2, etc.)
-                label = f"{chr(65 + col)}{row + 1}"
+
+                label = plate.get_well_label(i)
                 visualizer.add_text(x, y, r, f"{label}: {total_area} px")
 
                 # add well number and area to output
                 csv_out.append(f"{label},{total_area}")
 
-            visualizer.draw_circles(plate)
-            visualizer.draw_plate_bounding_box(plate)
+            visualizer.draw_circles(plate.wells)
+            visualizer.draw_plate_bounding_box(plate.wells)
             
         os.makedirs(output, exist_ok=True)
         out_name = os.path.splitext(os.path.basename(image_path))[0]

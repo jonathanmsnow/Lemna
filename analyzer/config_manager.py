@@ -45,6 +45,11 @@ class ConfigManager:
             "well_analyzer": {
                 "hsv_lower_bound": (20, 18, 0),
                 "hsv_upper_bound": (179, 255, 91)
+            },
+            "plate": {
+                "rows": 6,
+                "cols": 4,
+                "well_count": 24
             }
         }
         self.write()
