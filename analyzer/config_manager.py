@@ -40,7 +40,8 @@ class ConfigManager:
                 "param1": 45,
                 "param2": 20, 
                 "min_radius": 120,
-                "max_radius": 145
+                "max_radius": 145,
+                "eps": 350
             },
             "well_analyzer": {
                 "hsv_lower_bound": (20, 18, 0),

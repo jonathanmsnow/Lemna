@@ -64,14 +64,14 @@ class WellDetector:
         plates = []
         plate_count = 0;
         for cluster in clusters.values():
-            if len(cluster) == expected_well_count:
-                plate_count += 1
-                plate = Plate(
-                    label=f"Plate {plate_count}",
-                    rows=plate_rows, 
-                    cols=plate_cols, 
-                    wells=cluster)
-                plates.append(plate)
+            # if len(cluster) == expected_well_count:
+            plate_count += 1
+            plate = Plate(
+                label=f"Plate {plate_count}",
+                rows=plate_rows, 
+                cols=plate_cols, 
+                wells=cluster)
+            plates.append(plate)
         return plates
 
     def draw_plates(self, image, plates):

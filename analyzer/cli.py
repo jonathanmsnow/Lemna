@@ -89,6 +89,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
     rows = 6
     cols = 4
     well_count = 24
+    eps = 350
 
     if config:
         try:
@@ -102,6 +103,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
             param2 = well_detector_config.get('param2')
             min_radius = well_detector_config.get('min_radius')
             max_radius = well_detector_config.get('max_radius')
+            eps = well_detector_config.get('eps') or eps
 
             well_analyzer_config = config_manager.get('well_analyzer')
             hsv_lower_bound = tuple(well_analyzer_config.get('hsv_lower_bound'))
@@ -133,7 +135,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         wells = detector.detect_wells(dp, min_dist, param1, param2, min_radius, max_radius)
        
         sorted_wells = detector.sort_circles(wells)
-        plates = detector.group_wells_into_plates(sorted_wells, plate_rows=rows, plate_cols=cols)
+        plates = detector.group_wells_into_plates(sorted_wells, plate_rows=rows, plate_cols=cols, eps=eps)
 
         # Step 3: Analyze duckweed for each well
         analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
@@ -146,9 +148,10 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
             for i, (x, y, r) in enumerate(plate.wells):
                 # Analyze the duckweed in the current well
                 contours, total_area = analyzer.analyze_plant_area(x, y, r)
-
+         
                 # Draw the circle and contours on the image
                 visualizer.draw_contours(contours)
+
 
                 label = plate.get_well_label(i)
                 visualizer.add_text(x, y, r, f"{label}: {total_area} px")
