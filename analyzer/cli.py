@@ -8,6 +8,8 @@ from pathlib import Path
 import os
 import click
 
+from analyzer.plate import Plate
+
 
 @click.group()
 def cli():
@@ -90,6 +92,7 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
     cols = 4
     well_count = 24
     eps = 350
+    is_plate_grouping_enabled = True
 
     if config:
         try:
@@ -113,15 +116,17 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
             rows = plate_config.get('rows')
             cols = plate_config.get('cols')
             well_count = plate_config.get('well_count')
-        except:
-            click.echo(f"Failed while process config file {config}")
+            is_plate_grouping_enabled = plate_config.get('grouping')
+        except Exception as e:
+            click.echo(e)
+            click.echo(f"Failed while processing config file {config}")
     else:
         # If no config file, use CLI values with defaults
         dp = dp or 1
         min_dist = min_dist or 270
         param1 = param1 or 45
         param2 = param2 or 20
-        min_adius = min_radius or 120
+        min_radius = min_radius or 120
         max_radius = max_radius or 145
 
     def process_image(image_path, output):
@@ -135,7 +140,14 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         wells = detector.detect_wells(dp, min_dist, param1, param2, min_radius, max_radius)
        
         sorted_wells = detector.sort_circles(wells)
-        plates = detector.group_wells_into_plates(sorted_wells, plate_rows=rows, plate_cols=cols, eps=eps)
+        if is_plate_grouping_enabled:
+            plates = detector.group_wells_into_plates(sorted_wells, plate_rows=rows, plate_cols=cols, eps=eps)
+        else:
+            plates = [Plate(
+                label="Plate 1",
+                rows=0, 
+                cols=0, 
+                wells=sorted_wells)]
 
         # Step 3: Analyze duckweed for each well
         analyzer = WellAnalyzer(processor.get_original_image(), hsv_lower_bound, hsv_upper_bound)
@@ -143,24 +155,39 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
 
         csv_out = []
         csv_out.append("Plate,Well,Area")
+        if is_plate_grouping_enabled:
+            for plate in plates:
+                for i, (x, y, r) in enumerate(plate.wells):
+                    # Analyze the duckweed in the current well
+                    contours, total_area = analyzer.analyze_plant_area(x, y, r)
+            
+                    # Draw the circle and contours on the image
+                    visualizer.draw_contours(contours)
 
-        for plate in plates:
-            for i, (x, y, r) in enumerate(plate.wells):
-                # Analyze the duckweed in the current well
-                contours, total_area = analyzer.analyze_plant_area(x, y, r)
-         
-                # Draw the circle and contours on the image
-                visualizer.draw_contours(contours)
 
+                    label = plate.get_well_label(i)
+                    visualizer.add_text(x, y, r, f"{label}: {total_area} px")
 
-                label = plate.get_well_label(i)
-                visualizer.add_text(x, y, r, f"{label}: {total_area} px")
+                    # add well label and area to output
+                    csv_out.append(f"{plate.label},{label},{total_area}")
 
-                # add well label and area to output
-                csv_out.append(f"{plate.label},{label},{total_area}")
+                visualizer.draw_circles(plate.wells)
+                visualizer.draw_plate_bounding_box(plate.wells, label=plate.label)
+        else:
+            for i, (x, y, r) in enumerate(sorted_wells):
+                    # Analyze the duckweed in the current well
+                    contours, total_area = analyzer.analyze_plant_area(x, y, r)
+            
+                    # Draw the circle and contours on the image
+                    visualizer.draw_contours(contours)
 
-            visualizer.draw_circles(plate.wells)
-            visualizer.draw_plate_bounding_box(plate.wells, label=plate.label)
+                    visualizer.add_text(x, y, r, f"well {i}: {total_area} px")
+
+                    # add well label and area to output
+                    csv_out.append(f"1,well_{i},{total_area}")
+
+            visualizer.draw_circles(sorted_wells)
+
             
         os.makedirs(output, exist_ok=True)
         out_name = os.path.splitext(os.path.basename(image_path))[0]

@@ -48,6 +48,7 @@ class ConfigManager:
                 "hsv_upper_bound": (179, 255, 91)
             },
             "plate": {
+                "grouping": True,
                 "rows": 6,
                 "cols": 4,
                 "well_count": 24

@@ -2,7 +2,7 @@ import math
 import cv2
 
 # Load the image
-image = cv2.imread('/Users/alyssadaigle/Desktop/A-image-20240627-170026_plates1_2.jpg')
+image = cv2.imread('Pilot Week 3 Day 7 Plate 1-2.jpg')
 
 # Store the clicked points
 points = []

@@ -10,6 +10,8 @@ class Plate:
         return self.rows * self.cols
     
     def get_well_label(self, index):
+        if self.cols == 0:
+            return ''
         well_row = index // self.cols
         well_col = index % self.cols   
         label = f"{chr(ord(self.row_start_letter) + well_col)}{well_row + 1}"
