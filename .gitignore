@@ -4,3 +4,8 @@ analyzer.egg-info
 *.toml
 analyzer/__pycache__/*
 analyzer/__pycache__/cli.cpython-312.pyc
+image-preprocessing/split_images
+image-preprocessing/in
+.env
+dataset/datasets
+analyzer/__pycache__

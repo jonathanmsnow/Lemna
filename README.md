@@ -41,8 +41,3 @@ This allows you to open an image or directory of images to be processed by ident
 
 - Usage
   `analyzer process -i <path_to_image>`
-
-
-## Authors
-Jonathan Snow
-[jonathansnow.com](https://jonathansnow.com)
