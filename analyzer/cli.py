@@ -1,3 +1,5 @@
+from analyzer.exporter.csv_exporter import CSVExporter
+from analyzer.exporter.data_exporter import DataExporter
 from analyzer.image_processor import ImageProcessor
 from analyzer.well_detector import WellDetector
 from analyzer.well_analyzer import WellAnalyzer
@@ -154,37 +156,42 @@ def process(images, config, output, dp, min_dist, param1, param2, min_radius, ma
         visualizer = Visualizer(processor.get_original_image())
 
         csv_out = []
-        csv_out.append("Plate,Well,Area")
+        csv_headers = "Plate,Well,Area,Perimeter,Mean Red,Mean Green,Mean Blue"
+        csv_out.append(csv_headers)
         if is_plate_grouping_enabled:
             for plate in plates:
                 for i, (x, y, r) in enumerate(plate.wells):
                     # Analyze the duckweed in the current well
-                    contours, total_area = analyzer.analyze_plant_area(x, y, r)
-            
+                    contours = analyzer.calculate_plant_contours(x, y, r)
+                    total_area = analyzer.calculate_plant_area(contours)
+                    perimeter = analyzer.calculate_plant_perimeter(contours)
+                    mean_r, mean_g, mean_b = analyzer.calculate_mean_rgb(image=processor.get_original_image(), contours=contours)
                     # Draw the circle and contours on the image
                     visualizer.draw_contours(contours)
-
 
                     label = plate.get_well_label(i)
                     visualizer.add_text(x, y, r, f"{label}: {total_area} px")
 
                     # add well label and area to output
-                    csv_out.append(f"{plate.label},{label},{total_area}")
+                    csv_out.append(f"{plate.label},{label},{total_area},{perimeter},{mean_r},{mean_g},{mean_b}")
 
                 visualizer.draw_circles(plate.wells)
                 visualizer.draw_plate_bounding_box(plate.wells, label=plate.label)
         else:
             for i, (x, y, r) in enumerate(sorted_wells):
                     # Analyze the duckweed in the current well
-                    contours, total_area = analyzer.analyze_plant_area(x, y, r)
-            
+                    contours = analyzer.calculate_plant_contours(x, y, r)
+                    total_area = analyzer.calculate_plant_area(contours)
+                    perimeter = analyzer.calculate_plant_perimeter(contours)
+
+
                     # Draw the circle and contours on the image
                     visualizer.draw_contours(contours)
 
                     visualizer.add_text(x, y, r, f"well {i}: {total_area} px")
 
                     # add well label and area to output
-                    csv_out.append(f"1,well_{i},{total_area}")
+                    csv_out.append(f"1,well_{i},{total_area},{perimeter}")
 
             visualizer.draw_circles(sorted_wells)
 

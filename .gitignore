@@ -9,3 +9,4 @@ image-preprocessing/in
 .env
 dataset/datasets
 analyzer/__pycache__
+test-image
