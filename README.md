@@ -1,43 +1,53 @@
 # Lemna
-A simple app utilizing computer vision (openCV) which identifies wells and calculates the area for any region that matches the given mask (HSV lower-upper).
+A simple app utilizing computer vision which identifies wells and calculates the area for any region that matches the given mask (HSV lower-upper).
 
 ## Getting Started
 
-### Dependencies
-
-* [Python 3](https://www.python.org/downloads/)
-* [Click](https://click.palletsprojects.com/en/8.1.x/)
-* [numpy](https://numpy.org/)
-* [openCV](https://opencv.org/)
-
-Following the install process below will add all dependecies (except for Python since it is required for installation and use).
-
 ### Installing
+Install via `pip` (recommended to use a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)):
 
-Clone or download a zip of the repository.
-
-`git clone https://github.com/jonathanmsnow/frond-area-cv.git`
-
-Navigate to the root directory of the cloned repository. You should see a file called `setup.py`.
+`pip install lemna`
 
 
-Now you should [create and activate a virtual environment for Python](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). 
+### Usage
 
-Once you are in your virtualenv, install the app using pip.
+This tool provides several commands via the CLI.
+You can use the app by typing `lemna` in the terminal. Typing `lemna --help` will show available commands.
 
-`pip install --editable .`
 
-### Commands
+#### threshold — Tune HSV Thresholds
 
-You can use the app by typing `analyzer` in the terminal. Typing `analyzer --help` will show available commands.
-##### threshold
-This allows you to open an image to determine the HSV upper and lower bound needed to isolate your points of interest in the image (e.g. fronds in wells).
+Determine optimal HSV thresholds for identifying areas of interest in wells.
 
-- Usage
-  `analyzer threshold -i <path_to_image> -w <width_to_display_image>`
+`lemna threshold -i path/to/image.jpg -w 640 -c config.toml`
 
-##### process
-This allows you to open an image or directory of images to be processed by identifying wells and measuring area in each of those wells.
+Options:
 
-- Usage
-  `analyzer process -i <path_to_image>`
+- `-i, --image`: Path to the image file
+- `-w, --width`: Optional display width for thresholding UI
+- `-c, --config`: Path to the config file to update HSV values
+
+#### process — Analyze Images
+
+Detect wells, analyze plant area, and output CSV + annotated images.
+
+`lemna process -i path/to/image_or_folder -o ./output -c config.toml`
+
+Options:
+- `-i, --image`: Path to image or folder of images
+- `-o, --output`: Output directory
+- `-c, --config`: Path to config file
+- `--dp`: Inverse accumulator resolution ratio (default: `1`)
+- `--min_dist`: Minimum distance between circle centers (default: `270`)
+- `--param1`: First Canny param (default: `45`)
+- `--param2`: Accumulator threshold (default: `20`)
+- `--min_radius`: Minimum circle radius (default: `120`)
+- `--max_radius`: Maximum circle radius (default: `145`)
+
+If a config file is provided, values are defaulted as list above.
+
+#### config — Generate Config File
+
+Create a new default configuration TOML file which can be used while processing images.
+
+`lemna config -f config.toml`

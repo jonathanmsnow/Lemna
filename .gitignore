@@ -1,6 +1,8 @@
 images
-analyzer.egg-info
+lemna.egg-info
 *.toml
+build
+dist
 analyzer/__pycache__
 analyzer/__pycache__/cli.cpython-312.pyc
 image-preprocessing/split_images

@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from analyzer.plate import Plate
+from app.plate import Plate
 from sklearn.cluster import DBSCAN
 
 class WellDetector:

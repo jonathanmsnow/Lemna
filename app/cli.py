@@ -1,14 +1,15 @@
-from analyzer.image_processor import ImageProcessor
-from analyzer.well_detector import WellDetector
-from analyzer.well_analyzer import WellAnalyzer
-from analyzer.visualizer import Visualizer
-from analyzer.hsv_thresholder import HsvThresolder
-from analyzer.config_manager import ConfigManager
+from app.image_processor import ImageProcessor
+from app.well_detector import WellDetector
+from app.well_analyzer import WellAnalyzer
+from app.visualizer import Visualizer
+from app.hsv_thresholder import HsvThresolder
+from app.config_manager import ConfigManager
+from app.plate import Plate
 from pathlib import Path
 import os
 import click
 
-from analyzer.plate import Plate
+
 
 
 @click.group()

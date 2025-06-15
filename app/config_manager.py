@@ -7,7 +7,27 @@ class ConfigManager:
         if self.config_path.exists():
             self.load()
         else:
-            self.config = {}
+            self.config = {
+            "well_detector": {
+                "dp": 1,
+                "min_dist": 270, 
+                "param1": 45,
+                "param2": 20, 
+                "min_radius": 120,
+                "max_radius": 145,
+                "eps": 350
+            },
+            "well_analyzer": {
+                "hsv_lower_bound": (20, 18, 0),
+                "hsv_upper_bound": (179, 255, 91)
+            },
+            "plate": {
+                "grouping": True,
+                "rows": 6,
+                "cols": 4,
+                "well_count": 24
+            }
+        }
 
     def validate(self):
         pass
@@ -32,26 +52,4 @@ class ConfigManager:
     def generate(self):
         if self.config_path.exists():
             raise Exception("File already exists.")
- 
-        self.config = {
-            "well_detector": {
-                "dp": 1,
-                "min_dist": 270, 
-                "param1": 45,
-                "param2": 20, 
-                "min_radius": 120,
-                "max_radius": 145,
-                "eps": 350
-            },
-            "well_analyzer": {
-                "hsv_lower_bound": (20, 18, 0),
-                "hsv_upper_bound": (179, 255, 91)
-            },
-            "plate": {
-                "grouping": True,
-                "rows": 6,
-                "cols": 4,
-                "well_count": 24
-            }
-        }
         self.write()
